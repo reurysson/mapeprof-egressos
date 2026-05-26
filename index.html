@@ -663,7 +663,8 @@ async function carregarSheets() {
   if (!url) { document.getElementById('load-status').textContent = '⚠ Informe a URL do CSV'; return; }
   document.getElementById('load-status').textContent = '…carregando';
   try {
-    const r = await fetch(url);
+    const urlFresh = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
+  const r = await fetch(urlFresh, { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const txt = await r.text();
     const parsed = parseCSV(txt).filter(e => { const d = calcDias(e.defesaEfetiva); return d !== null && d >= 0; });
