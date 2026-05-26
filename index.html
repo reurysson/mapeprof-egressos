@@ -646,7 +646,9 @@ let chartsOk = false;
 let chartSit, chartTurma;
 
 // ── INIT ──────────────────────────────────────────────
-usarDemo();
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTD_gbDw4-46soqxowdb_Egumi36sExtf6TyMqD8-t-yD3nNMAygBR1SXiDrHoTKtgy-8v-abLpKOjY/pub?gid=1041846946&single=true&output=csv";
+document.getElementById('csv-url').value = CSV_URL;
+carregarSheets();
 
 function usarDemo() {
   DADOS = DEMO.filter(e => { const d = calcDias(e.defesa); return d !== null && d >= 0; });
