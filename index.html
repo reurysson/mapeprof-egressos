@@ -580,8 +580,8 @@ tbody tr:hover td { background: var(--azul-ll); }
 
 <script>
 // ── CONSTANTES ────────────────────────────────────────
-const TODAY     = new Date(2026, 4, 26);
-const TODAY_STR = '26/05/2026';
+const TODAY     = new Date();
+const TODAY_STR = new Date().toLocaleDateString('pt-BR');
 
 const calcDias = s => {
   if (!s) return null;
@@ -646,12 +646,14 @@ let chartsOk = false;
 let chartSit, chartTurma;
 
 // ── INIT ──────────────────────────────────────────────
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTD_gbDw4-46soqxowdb_Egumi36sExtf6TyMqD8-t-yD3nNMAygBR1SXiDrHoTKtgy-8v-abLpKOjY/pub?gid=1041846946&single=true&output=csv";
-document.getElementById('csv-url').value = CSV_URL;
-carregarSheets();
+usarDemo();
 
 function usarDemo() {
-  DADOS = DEMO.filter(e => { const d = calcDias(e.defesa); return d !== null && d >= 0; });
+  const demoComEfetiva = DEMO.map(e => ({
+    ...e,
+    defesaEfetiva: (e.defesaProrroga && e.defesaProrroga.trim()) ? e.defesaProrroga : e.defesa
+  }));
+  DADOS = demoComEfetiva.filter(e => { const d = calcDias(e.defesaEfetiva); return d !== null && d >= 0; });
   document.getElementById('load-status').textContent = '✓ Dados demo · ' + DADOS.length + ' egressos ativos';
   inicializar();
 }
@@ -664,7 +666,7 @@ async function carregarSheets() {
     const r = await fetch(url);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const txt = await r.text();
-    const parsed = parseCSV(txt).filter(e => { const d = calcDias(e.defesa); return d !== null && d >= 0; });
+    const parsed = parseCSV(txt).filter(e => { const d = calcDias(e.defesaEfetiva); return d !== null && d >= 0; });
     DADOS = parsed;
     document.getElementById('load-status').textContent = '✓ ' + DADOS.length + ' egressos · ' + new Date().toLocaleTimeString('pt-BR');
     inicializar();
@@ -692,8 +694,9 @@ function parseCSV(text) {
       if (h === 'Turma')              o.turma      = v;
       if (h === 'Orientador')         o.orientador = v;
       if (h === 'Linha')              o.linha      = v;
-      if (h === 'Data_Defesa')        o.defesa     = v;
-      if (h === 'Link_TCC')           o.tcc        = v;
+      if (h === 'Data_Defesa')        o.defesa          = v;
+      if (h === 'Prorrogacao_Defesa') o.defesaProrroga  = v;
+      if (h === 'Link_TCC')           o.tcc             = v;
       if (h === 'Status_Contato')     o.acomp      = mapAcomp(v);
       if (h === 'Emprego_Atual')      o.cargo      = v;
       if (h === 'Instituicao')        o.inst       = v;
@@ -705,6 +708,10 @@ function parseCSV(text) {
       if (h === 'TCC_Aplicado')       o.tccApl     = v;
     });
     if (!o.sit) o.sit = o.acomp === 'resp' ? 'emp' : 'pend';
+    // Usa prorrogação se preenchida, senão usa data regular
+    o.defesaEfetiva = (o.defesaProrroga && o.defesaProrroga.trim())
+      ? o.defesaProrroga
+      : o.defesa;
     return o;
   }).filter(e => e.mat);
 }
