@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Painel público de acompanhamento de egressos do MAPEPROF/IFPI — Mestrado Profissional em Análise e Planejamento Espacial">
+<meta property="og:title" content="Acompanhamento de Egressos — MAPEPROF/IFPI">
+<meta property="og:description" content="Painel de acompanhamento de egressos do Mestrado Profissional em Análise e Planejamento Espacial do Instituto Federal do Piauí">
+<title>Egressos — MAPEPROF/IFPI</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+:root {
+  --azul:        #1A3C6B;
+  --azul-m:      #2557A7;
+  --azul-l:      #E8F0FB;
+  --azul-ll:     #F4F7FD;
+  --roxo:        #5240AC;
+  --roxo-l:      #EEF0FB;
+  --verde:       #1E6B3C;
+  --verde-l:     #E8F5EE;
+  --amber:       #7A4D10;
+  --amber-l:     #FEF3E2;
+  --coral:       #8B2D1A;
+  --coral-l:     #FDECEA;
+  --cinza:       #64748B;
+  --cinza-l:     #F1F5F9;
+  --cinza-b:     #E2E8F0;
+  --branco:      #FFFFFF;
+  --texto:       #0F1F38;
+  --texto-s:     #475569;
+  --borda:       #D4DCE8;
+  --font:        'DM Sans', sans-serif;
+  --mono:        'DM Mono', monospace;
+  --r:           8px;
+  --r-lg:        14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: #F7F9FC;
+  color: var(--texto);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ─────────────────────────────────────────── */
+.header {
+  background: var(--azul);
+  color: #fff;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(26,60,107,.25);
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header-brand { display: flex; align-items: center; gap: 14px; }
+.header-logo {
+  width: 38px; height: 38px; border-radius: 8px;
+  background: rgba(255,255,255,.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 500; color: #fff;
+  border: 1px solid rgba(255,255,255,.2);
+  flex-shrink: 0;
+}
+.header-title { font-size: 15px; font-weight: 500; letter-spacing: -.2px; }
+.header-sub   { font-size: 11px; opacity: .65; margin-top: 1px; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.btn-header {
+  padding: 6px 14px; border-radius: var(--r);
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.1);
+  color: #fff; font-family: var(--font); font-size: 12px;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background .15s;
+}
+.btn-header:hover { background: rgba(255,255,255,.2); }
+.last-update { font-size: 11px; opacity: .6; }
+
+/* ── HERO ────────────────────────────────────────────── */
+.hero {
+  background: linear-gradient(160deg, var(--azul) 0%, #2E5FA3 55%, #3B72C0 100%);
+  color: #fff;
+  padding: 48px 28px 56px;
+}
+.hero-inner { max-width: 1200px; margin: 0 auto; }
+.hero-eyebrow {
+  font-size: 11px; font-weight: 500; letter-spacing: 1.5px;
+  text-transform: uppercase; opacity: .65; margin-bottom: 10px;
+}
+.hero-h1 {
+  font-size: 32px; font-weight: 300; letter-spacing: -.5px; line-height: 1.2;
+  margin-bottom: 12px;
+}
+.hero-h1 strong { font-weight: 500; }
+.hero-desc {
+  font-size: 14px; opacity: .75; max-width: 620px; line-height: 1.7;
+  margin-bottom: 28px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  border-radius: 20px; padding: 5px 14px; font-size: 12px;
+}
+.hero-badge::before { content: ''; width: 7px; height: 7px; background: #4ADE80; border-radius: 50%; }
+
+/* ── MAIN ────────────────────────────────────────────── */
+.main { max-width: 1200px; margin: 0 auto; padding: 32px 28px 64px; }
+
+/* ── KPI GRID ─────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+  margin-top: -36px;
+}
+.kpi {
+  background: var(--branco);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  border: 1px solid var(--borda);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  position: relative;
+  overflow: hidden;
+}
+.kpi::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--kpi-color, var(--azul-m));
+  border-radius: 3px 3px 0 0;
+}
+.kpi-label { font-size: 11px; color: var(--cinza); font-weight: 400; margin-bottom: 4px; }
+.kpi-value { font-size: 28px; font-weight: 300; color: var(--texto); line-height: 1; }
+.kpi-sub   { font-size: 11px; color: var(--cinza); margin-top: 5px; }
+
+/* ── SECTION ─────────────────────────────────────────── */
+.section { margin-bottom: 28px; }
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+}
+.section-title { font-size: 16px; font-weight: 500; color: var(--texto); }
+.section-sub   { font-size: 12px; color: var(--cinza); margin-top: 2px; }
+
+/* ── CHARTS ──────────────────────────────────────────── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.card {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.card-title { font-size: 13px; font-weight: 500; margin-bottom: 14px; color: var(--texto); }
+.legend { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--texto-s);
+}
+.legend-swatch {
+  width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+}
+.legend-val { font-weight: 500; color: var(--texto); margin-left: auto; font-size: 13px; }
+
+/* ── FILTERS ─────────────────────────────────────────── */
+.filters {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+.filter-input {
+  padding: 7px 12px;
+  border: 1px solid var(--cinza-b);
+  border-radius: var(--r);
+  font-family: var(--font); font-size: 13px;
+  background: var(--cinza-l); color: var(--texto);
+  outline: none; width: 200px;
+}
+.filter-input:focus { border-color: var(--azul-m); background: #fff; box-shadow: 0 0 0 3px rgba(37,87,167,.1); }
+select.filter-input { cursor: pointer; width: auto; }
+.tabs { display: flex; gap: 4px; }
+.tab {
+  padding: 6px 14px; border-radius: var(--r);
+  border: 1px solid var(--cinza-b);
+  background: var(--cinza-l); color: var(--cinza);
+  font-family: var(--font); font-size: 12px; font-weight: 400;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.tab:hover { background: var(--azul-ll); border-color: var(--azul-m); color: var(--azul-m); }
+.tab.active {
+  background: var(--azul);
+  border-color: var(--azul);
+  color: #fff;
+  font-weight: 500;
+}
+.btn-limpar {
+  padding: 6px 12px; border-radius: var(--r);
+  border: 1px solid var(--cinza-b);
+  background: none; color: var(--cinza);
+  font-family: var(--font); font-size: 12px;
+  cursor: pointer; display: none;
+}
+.btn-limpar:hover { background: var(--cinza-l); }
+
+/* ── TABLE ───────────────────────────────────────────── */
+.table-wrap {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.table-scroll { overflow-x: auto; }
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; table-layout: fixed;
+}
+thead th {
+  padding: 10px 12px;
+  background: var(--azul-ll);
+  border-bottom: 1px solid var(--borda);
+  font-size: 11px; font-weight: 500;
+  color: var(--cinza); text-align: left;
+  white-space: nowrap;
+}
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: top;
+  line-height: 1.5;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--azul-ll); }
+.table-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--cinza-b);
+  background: var(--cinza-l);
+  font-size: 11px; color: var(--cinza);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 6px;
+}
+
+/* ── BADGES ──────────────────────────────────────────── */
+.badge {
+  display: inline-block; padding: 2px 9px;
+  border-radius: 20px; font-size: 11px;
+  border: 1px solid; white-space: nowrap;
+}
+.b-resp   { background: var(--verde-l);  color: var(--verde);  border-color: #A3D9B8; }
+.b-env    { background: var(--azul-l);   color: var(--azul-m); border-color: #B5D4F4; }
+.b-pend   { background: var(--cinza-l);  color: var(--cinza);  border-color: var(--cinza-b); }
+.b-warn   { background: var(--amber-l);  color: var(--amber);  border-color: #FAC775; }
+.b-dout   { background: var(--roxo-l);   color: var(--roxo);   border-color: #C4B5FD; }
+.b-desemp { background: var(--coral-l);  color: var(--coral);  border-color: #F5C4B3; }
+.b-afast  { background: var(--amber-l);  color: var(--amber);  border-color: #FAC775; }
+.pill-l1  { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; background: var(--azul-l); color: var(--azul-m); }
+.pill-l2  { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; background: var(--roxo-l); color: var(--roxo); }
+
+/* ── NOME ────────────────────────────────────────────── */
+.nome      { font-weight: 500; color: var(--texto); font-size: 12.5px; }
+.mat       { font-family: var(--mono); font-size: 10.5px; color: #94A3B8; margin-top: 1px; }
+.dim       { color: var(--cinza); font-size: 11.5px; }
+.dim-sm    { color: #94A3B8; font-size: 10.5px; }
+.inst      { color: var(--texto-s); font-size: 11.5px; }
+
+/* ── CONFORM ─────────────────────────────────────────── */
+.conform-bar {
+  border-left: 4px solid var(--azul-m);
+  background: var(--azul-ll);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 12px 16px;
+  font-size: 12.5px; color: var(--texto-s); line-height: 1.65;
+  margin-bottom: 28px;
+}
+.conform-bar strong { color: var(--texto); font-weight: 500; }
+
+/* ── FOOTER PAGE ─────────────────────────────────────── */
+.footer {
+  background: var(--azul);
+  color: rgba(255,255,255,.6);
+  padding: 28px;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.8;
+}
+.footer a { color: rgba(255,255,255,.85); }
+
+/* ── LOADING ─────────────────────────────────────────── */
+.loading-row td { text-align: center; padding: 56px; color: var(--cinza); font-size: 13px; }
+
+/* ── CONFIG PANEL ────────────────────────────────────── */
+.config-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: var(--r);
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.8);
+  font-family: var(--font); font-size: 12px;
+  cursor: pointer;
+}
+.config-toggle:hover { background: rgba(255,255,255,.2); }
+.config-panel {
+  display: none;
+  background: var(--branco);
+  border-bottom: 1px solid var(--borda);
+  padding: 16px 28px;
+}
+.config-inner { max-width: 1200px; margin: 0 auto; }
+.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.config-label { font-size: 11px; font-weight: 500; color: var(--cinza); margin-bottom: 4px; display: block; }
+.config-input {
+  width: 100%; padding: 8px 10px;
+  border: 1px solid var(--cinza-b); border-radius: var(--r);
+  font-family: var(--font); font-size: 12px; color: var(--texto);
+  outline: none; background: var(--cinza-l);
+}
+.config-input:focus { border-color: var(--azul-m); background: #fff; }
+.config-hint { font-size: 10px; color: #94A3B8; margin-top: 3px; }
+.btn-load {
+  padding: 7px 16px; border-radius: var(--r);
+  background: var(--azul); color: #fff;
+  border: none; font-family: var(--font); font-size: 13px;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-load:hover { background: var(--azul-m); }
+.btn-demo {
+  padding: 7px 14px; border-radius: var(--r);
+  background: none; color: var(--cinza);
+  border: 1px solid var(--cinza-b); font-family: var(--font); font-size: 13px;
+  cursor: pointer;
+}
+.btn-demo:hover { background: var(--cinza-l); }
+#load-status { font-size: 12px; color: var(--cinza); }
+.config-note {
+  background: #FFFBEB; border: 1px solid #FDE68A;
+  border-radius: var(--r); padding: 10px 14px;
+  font-size: 11.5px; color: #92400E; line-height: 1.65;
+  margin-top: 12px;
+}
+.config-note code {
+  background: rgba(0,0,0,.06); padding: 1px 5px;
+  border-radius: 4px; font-family: var(--mono); font-size: 11px;
+}
+
+/* ── PRINT ───────────────────────────────────────────── */
+@media print {
+  .header, .config-toggle, .config-panel, .filters, .btn-header, .no-print { display: none !important; }
+  .hero { background: #1A3C6B !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .kpi-grid { break-inside: avoid; }
+  .table-wrap { box-shadow: none; }
+  body { background: #fff; font-size: 11px; }
+  .main { padding: 16px; }
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .config-grid  { grid-template-columns: 1fr; }
+  .hero-h1 { font-size: 24px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  table { font-size: 12px; }
+  .header-inner { padding: 10px 16px; }
+  .main { padding: 20px 16px 48px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── CONFIG PANEL (oculto por padrão) ─────────────── -->
+<div id="config-panel" class="config-panel">
+  <div class="config-inner">
+    <div class="config-grid">
+      <div>
+        <label class="config-label">URL CSV — aba "Acompanhamento" (publicada na web)</label>
+        <input class="config-input" type="url" id="csv-url"
+          placeholder="https://docs.google.com/spreadsheets/d/…/pub?gid=…&output=csv">
+        <p class="config-hint">Planilha → Arquivo → Publicar na web → Aba Acompanhamento → CSV</p>
+      </div>
+      <div>
+        <label class="config-label">URL base do Google Forms (campo CPF pre-fill)</label>
+        <input class="config-input" type="url" id="form-url"
+          placeholder="https://docs.google.com/forms/d/…/viewform?entry.XXXXXXXX=">
+        <p class="config-hint">Forms → Pré-preenchimento → Preencha CPF → Obter link → copie até o sinal = do campo CPF</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn-load" onclick="carregarSheets()">↓ Carregar do Sheets</button>
+      <button class="btn-demo" onclick="usarDemo()">Usar dados demo</button>
+      <span id="load-status"></span>
+    </div>
+    <div class="config-note">
+      <strong>Colunas obrigatórias na aba Acompanhamento:</strong><br>
+      <code>Matricula · Nome · Turma · Orientador · Linha · Data_Defesa · Link_TCC · Bolsista · Email_Contato · Telefone · Form_URL · Status_Contato · Data_Envio_Forms · Data_Resposta · Emprego_Atual · Instituicao · Municipio_UF · Situacao_Atual · Motivo_Nao_Trabalhando · Doutorado_Status · Doutorado_Instituicao · Doutorado_Programa · TCC_Aplicado · Nota_Contribuicao · Nota_Recomendacao</code><br><br>
+      <strong>🔐 Segurança:</strong> A coluna <code>CPF</code> fica na aba privada "Egressos" e nunca é publicada. A <code>Form_URL</code> na aba Acompanhamento já embute o CPF via fórmula do Sheets.
+    </div>
+  </div>
+</div>
+
+<!-- ── HEADER ─────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="header-logo">M</div>
+      <div>
+        <div class="header-title">MAPEPROF · IFPI</div>
+        <div class="header-sub">Acompanhamento de Egressos</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="last-update" id="last-update-hdr"></span>
+      <button class="config-toggle" onclick="toggleConfig()" id="btn-config">⚙ Configurar</button>
+      <button class="btn-header" onclick="atualizarDados()" id="btn-upd">↺ Atualizar</button>
+      <button class="btn-header no-print" onclick="window.print()">⬇ Relatório PDF</button>
+    </div>
+  </div>
+</header>
+
+<!-- ── HERO ───────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">Instituto Federal do Piauí — Pós-Graduação</p>
+    <h1 class="hero-h1">Acompanhamento de<br><strong>egressos do MAPEPROF</strong></h1>
+    <p class="hero-desc">
+      Mestrado Profissional em Análise e Planejamento Espacial — dados de inserção profissional, progressão acadêmica e impacto do programa, coletados em conformidade com as diretrizes de acompanhamento de egressos da CAPES.
+    </p>
+    <span class="hero-badge">Atualizado em <span id="hero-date" style="font-weight:500;margin-left:4px">—</span></span>
+  </div>
+</section>
+
+<!-- ── KPI ────────────────────────────────────────────── -->
+<div class="main">
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi" style="--kpi-color:#2557A7">
+      <p class="kpi-label">Egressos ativos (prazo CAPES)</p>
+      <p class="kpi-value" id="k-total">—</p>
+      <p class="kpi-sub">Dentro dos 5 anos pós-titulação</p>
+    </div>
+    <div class="kpi" style="--kpi-color:#1E6B3C">
+      <p class="kpi-label">Taxa de resposta</p>
+      <p class="kpi-value" id="k-taxa">—</p>
+      <p class="kpi-sub" id="k-taxa-s">—</p>
+    </div>
+    <div class="kpi" style="--kpi-color:#7A4D10">
+      <p class="kpi-label">Atuando na área</p>
+      <p class="kpi-value" id="k-area">—</p>
+      <p class="kpi-sub">Dos respondentes empregados</p>
+    </div>
+    <div class="kpi" style="--kpi-color:#5240AC">
+      <p class="kpi-label">Em doutorado</p>
+      <p class="kpi-value" id="k-dout">—</p>
+      <p class="kpi-sub" id="k-dout-s">—</p>
+    </div>
+    <div class="kpi" style="--kpi-color:#1E6B3C">
+      <p class="kpi-label">TCCs aplicados</p>
+      <p class="kpi-value" id="k-tcc">—</p>
+      <p class="kpi-sub">Na prática profissional</p>
+    </div>
+  </div>
+
+  <!-- CONFORM BAR -->
+  <div class="conform-bar">
+    <strong>Conformidade CAPES:</strong> Este programa mantém acompanhamento ativo de egressos pelo período de 5 anos após a titulação, em conformidade com a <strong>Portaria CAPES nº 131/2017</strong>. Os dados são coletados por formulário eletrônico estruturado e atualizados periodicamente. Egressos cujo prazo de 5 anos tenha se encerrado são removidos automaticamente deste painel.
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid section">
+    <div class="card">
+      <p class="card-title">Situação atual dos respondentes</p>
+      <div style="position:relative;height:160px">
+        <canvas id="chart-sit" role="img" aria-label="Gráfico de situação atual dos egressos respondentes">Situação atual dos egressos respondentes.</canvas>
+      </div>
+      <div class="legend" id="leg-sit"></div>
+    </div>
+    <div class="card">
+      <p class="card-title">Titulados por turma (Linhas I e II)</p>
+      <div style="position:relative;height:160px">
+        <canvas id="chart-turma" role="img" aria-label="Titulados por turma divididos por linha de pesquisa">Titulados por turma.</canvas>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:var(--cinza);flex-wrap:wrap">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2557A7;margin-right:4px"></span>Linha I — Produção do espaço</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#7F77DD;margin-right:4px"></span>Linha II — Análise espacial</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABELA -->
+  <div class="section">
+    <div class="section-head">
+      <div>
+        <p class="section-title">Relação de egressos ativos</p>
+        <p class="section-sub">Apenas egressos dentro do prazo CAPES de 5 anos após a data de defesa</p>
+      </div>
+    </div>
+
+    <div class="filters no-print">
+      <input class="filter-input" type="text" id="busca" placeholder="🔍  Buscar por nome…" oninput="renderTabela()">
+      <select class="filter-input" id="f-turma" onchange="renderTabela()">
+        <option value="">Todas as turmas</option>
+      </select>
+      <div class="tabs">
+        <button class="tab active" onclick="setTab('todos',this)">Todos</button>
+        <button class="tab" onclick="setTab('emp',this)">Empregados</button>
+        <button class="tab" onclick="setTab('dout',this)">Em doutorado</button>
+        <button class="tab" onclick="setTab('resp',this)">Com dados</button>
+      </div>
+      <button class="btn-limpar" id="btn-limpar" onclick="limpar()">✕ Limpar</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:22%">Egresso</th>
+              <th style="width:9%">Turma</th>
+              <th style="width:15%">Orientador</th>
+              <th style="width:5%">L</th>
+              <th style="width:14%">Situação atual</th>
+              <th style="width:14%">Atuação / Instituição</th>
+              <th style="width:10%">Doutorado</th>
+              <th style="width:6%">TCC</th>
+              <th style="width:9%">Status</th>
+              <th style="width:5%">Link</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr class="loading-row"><td colspan="10">Carregando dados…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="tfoot-l">—</span>
+        <span>Dados obtidos mediante formulário eletrônico voluntário · MAPEPROF/IFPI</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.main -->
+
+<!-- ── PAGE FOOTER ────────────────────────────────────── -->
+<footer class="footer">
+  <p><strong style="color:#fff">MAPEPROF — Mestrado Profissional em Análise e Planejamento Espacial</strong></p>
+  <p>Instituto Federal do Piauí · Campus Teresina Central</p>
+  <p style="margin-top:8px">
+    <a href="mailto:mapeprof@ifpi.edu.br">mapeprof@ifpi.edu.br</a> ·
+    <a href="https://www.ifpi.edu.br/mapeprof" target="_blank">www.ifpi.edu.br/mapeprof</a>
+  </p>
+  <p style="margin-top:8px;font-size:10px;opacity:.5">
+    Conformidade: Portaria CAPES nº 131/2017 · Dados atualizados periodicamente pela Coordenação do Programa
+  </p>
+</footer>
+
+<script>
+// ── CONSTANTES ────────────────────────────────────────
+const TODAY     = new Date(2026, 4, 26);
+const TODAY_STR = '26/05/2026';
+
+const calcDias = s => {
+  if (!s) return null;
+  const sep = s.includes('-') ? '-' : '/';
+  let [a, b, c] = s.split(sep).map(Number);
+  const [y, m, d] = sep === '-' ? [a, b, c] : [c, b, a];
+  const def = new Date(y, m - 1, d);
+  const lim = new Date(def); lim.setFullYear(lim.getFullYear() + 5);
+  return Math.floor((lim - TODAY) / 86400000);
+};
+const fmtDate = s => {
+  if (!s || s === '—') return '—';
+  const sep = s.includes('-') ? '-' : '/';
+  const p = s.split(sep);
+  return sep === '-' ? `${p[2]}/${p[1]}/${p[0]}` : s;
+};
+
+// ── DEMO DATA ────────────────────────────────────────
+const DEMO = [
+  { mat:'20191MAPE0066', nome:'Marcos Antonio Cavalcante de Oliveira Júnior', turma:'2019/1', defesa:'2021-09-02', orientador:'Glairton Cardoso Rocha', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1261', acomp:'resp', sit:'emp', cargo:'Analista de planejamento', inst:'SEMDEC Teresina', tccApl:'Sim', dout:'nao' },
+  { mat:'20191MAPE0090', nome:'Francisco José da Silva Júnior', turma:'2019/1', defesa:'2021-10-05', orientador:'Antonio Joaquim da Silva', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1159', acomp:'pend', sit:'pend' },
+  { mat:'20191MAPE0082', nome:'Renato Alves Pedrosa', turma:'2019/1', defesa:'2021-12-20', orientador:'Mauro César de Brito Sousa', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1263', acomp:'resp', sit:'emp', cargo:'Professor', inst:'SEDUC-PI', tccApl:'Sim', dout:'nao' },
+  { mat:'20191MAPE0058', nome:'Danielly dos Santos Ferreira', turma:'2019/1', defesa:'2021-12-22', orientador:'Valdira de Caldas Brito Vieira', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1158', acomp:'env', sit:'pend' },
+  { mat:'20191MAPE0015', nome:'Lailton da Silva Freire', turma:'2019/1', defesa:'2021-12-21', orientador:'Paulo Henrique de Carvalho Bueno', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1161', acomp:'pend', sit:'pend' },
+  { mat:'20191MAPE0074', nome:'Liliane Hanna Georges', turma:'2019/1', defesa:'2021-12-22', orientador:'Érico Gomes Rodrigues', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1160', acomp:'pend', sit:'pend' },
+  { mat:'2021111PAPE0062', nome:'Patrícia Barbosa Pereira', turma:'2021/1', defesa:'2023-02-06', orientador:'Glairton Cardoso Rocha', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1569', acomp:'resp', sit:'emp', cargo:'Analista de planejamento urbano', inst:'SEMPLAN', tccApl:'Sim', dout:'nao' },
+  { mat:'2021111PAPE0097', nome:'Cândida Maria Barbosa Feitosa Silva', turma:'2021/1', defesa:'2023-02-24', orientador:'Laudenides Pontes dos Santos', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1733', acomp:'resp', sit:'emp', cargo:'Professora', inst:'SEDUC-PI', tccApl:'Sim', dout:'nao' },
+  { mat:'2021111PAPE0038', nome:'Natanael de Araújo da Silva', turma:'2021/1', defesa:'2023-03-08', orientador:'Paulo Henrique de Carvalho Bueno', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1715', acomp:'resp', sit:'dout', tccApl:'Parcialmente', dout:'sim', doutInst:'UFPI', doutProg:'PPG Geografia' },
+  { mat:'2021111PAPE0011', nome:'Jacqueline Ribeiro Alcântara', turma:'2021/1', defesa:'2023-03-14', orientador:'Bruna de Freitas Iwata', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1744', acomp:'resp', sit:'emp', cargo:'Professora', inst:'UESPI', tccApl:'Sim', dout:'nao' },
+  { mat:'2021111PAPE0054', nome:'Juciara de Oliveira Sousa', turma:'2021/1', defesa:'2023-03-10', orientador:'Antonio Joaquim da Silva', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1856', acomp:'pend', sit:'pend' },
+  { mat:'2021111PAPE0127', nome:'Maria da Conceição Dias do Nascimento', turma:'2021/1', defesa:'2023-03-15', orientador:'Sammya Vanessa Chaves', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1833', acomp:'resp', sit:'dout', tccApl:'Sim', dout:'sim', doutInst:'UNICAMP', doutProg:'PPG Geociências' },
+  { mat:'2021111PAPE0100', nome:'João Victor Vieira Rocha', turma:'2021/1', defesa:'2023-03-30', orientador:'Valdira de Caldas Brito Vieira', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1745', acomp:'resp', sit:'emp', cargo:'Servidor federal', inst:'IBGE', tccApl:'Sim', dout:'nao' },
+  { mat:'2021111PAPE0020', nome:'Marco Aurélio da Silva Lira Filho', turma:'2021/1', defesa:'2023-03-23', orientador:'Mauro César de Brito Sousa', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/1790', acomp:'env', sit:'pend' },
+  { mat:'2021111PAPE0046', nome:'Eduarda e Silva da Cunha', turma:'2021/1', defesa:'2023-06-14', orientador:'Francílio de Amorim dos Santos', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/2183', acomp:'pend', sit:'pend' },
+  { mat:'2021111PAPE0119', nome:'Marcos Paulo Gomes Gonçalves', turma:'2021/1', defesa:'2023-07-17', orientador:'Bruna de Freitas Iwata', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/2254', acomp:'resp', sit:'emp', cargo:'Técnico Geoprocessamento', inst:'CPRM', tccApl:'Sim', dout:'interesse' },
+  { mat:'2021111PAPE0070', nome:'Samuel Campêlo de Vasconcelos Maia', turma:'2021/1', defesa:'2023-08-02', orientador:'Érico Gomes Rodrigues', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/2338', acomp:'pend', sit:'pend' },
+  { mat:'2022111PAPE0077', nome:'Letícia Braz de Macedo', turma:'2022/1', defesa:'2024-03-25', orientador:'Bruna de Freitas Iwata', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/3580', acomp:'resp', sit:'afast', motivoNaoTrab:'Licença maternidade', tccApl:'Não', dout:'nao' },
+  { mat:'2022111PAPE0093', nome:'Marinaldo de Jesus Souza', turma:'2022/1', defesa:'2024-04-18', orientador:'Francílio de Amorim dos Santos', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/3518', acomp:'resp', sit:'emp', cargo:'Servidor municipal', inst:'PMT', tccApl:'Sim', dout:'interesse' },
+  { mat:'2022111PAPE0107', nome:'Maria de Fátima de Matos Carvalho', turma:'2022/1', defesa:'2024-04-19', orientador:'Sammya Vanessa Chaves', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/3724', acomp:'pend', sit:'pend' },
+  { mat:'2022111PAPE0069', nome:'Joseane Maria da Conceição', turma:'2022/1', defesa:'2024-08-26', orientador:'Glairton Cardoso Rocha', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/3874', acomp:'pend', sit:'pend' },
+  { mat:'2022111PAPE0026', nome:'Ângello Gabriel de Sousa Meneses', turma:'2022/1', defesa:'2024-08-29', orientador:'Paulo Henrique de Carvalho Bueno', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/3899', acomp:'resp', sit:'dout', tccApl:'Sim', dout:'sim', doutInst:'UFC', doutProg:'PPG Geografia' },
+  { mat:'2022111PAPE0018', nome:'Dandara Bechara Resque', turma:'2022/1', defesa:'2024-08-30', orientador:'Valdira de Caldas Brito Vieira', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/3864', acomp:'pend', sit:'pend' },
+  { mat:'2022111PAPE0034', nome:'Emanuel Rodrigo Reis da Silva', turma:'2022/1', defesa:'2024-08-28', orientador:'Laudenides Pontes dos Santos', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/3884', acomp:'pend', sit:'pend' },
+  { mat:'2022111PAPE0115', nome:'Daniella Rodrigues Tavares', turma:'2022/1', defesa:'2024-09-09', orientador:'Mauro César de Brito Sousa', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/3883', acomp:'pend', sit:'pend' },
+  { mat:'2022111PAPE0050', nome:'Cinthia Maria Feitosa Beleza', turma:'2022/1', defesa:'2025-02-19', orientador:'Antonio Joaquim da Silva', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/4291', acomp:'pend', sit:'pend' },
+  { mat:'2023111PAPE0002', nome:'Sérgio Idelano Dantas', turma:'2023/1', defesa:'2025-04-30', orientador:'Valdira de Caldas Brito Vieira', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/4766', acomp:'pend', sit:'pend' },
+  { mat:'2023111PAPE0008', nome:'Raylla Sousa Alves', turma:'2023/1', defesa:'2025-05-16', orientador:'Sammya Vanessa Chaves', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/4806', acomp:'pend', sit:'pend' },
+  { mat:'2023111PAPE0009', nome:'Thais Costa de Sousa', turma:'2023/1', defesa:'2025-06-16', orientador:'Laudenides Pontes dos Santos', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/4722', acomp:'pend', sit:'pend' },
+  { mat:'2023111PAPE0011', nome:'Leda Barros Moura', turma:'2023/1', defesa:'2025-07-18', orientador:'Antonio Joaquim da Silva', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/4696', acomp:'pend', sit:'pend' },
+  { mat:'2023111PAPE0005', nome:'Leonardo Wilton Nunes de Carvalho', turma:'2023/1', defesa:'2025-07-18', orientador:'Reurysson Chagas de Sousa Morais', linha:'I', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/4721', acomp:'pend', sit:'pend' },
+  { mat:'2023111PAPE0001', nome:'Jean Carlos Rodrigues de Brito', turma:'2023/1', defesa:'2025-09-22', orientador:'Francílio de Amorim dos Santos', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/5211', acomp:'pend', sit:'pend' },
+  { mat:'2023111PAPE0007', nome:'Daniel Guimarães Gonçalves', turma:'2023/1', defesa:'2025-09-30', orientador:'Bruna de Freitas Iwata', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/5092', acomp:'pend', sit:'pend' },
+  { mat:'2023111PAPE0010', nome:'Tácito Fellipe Meneses Braga', turma:'2023/1', defesa:'2025-10-31', orientador:'Glairton Cardoso Rocha', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/5398', acomp:'pend', sit:'pend' },
+  { mat:'2023211PAPE0001', nome:'Francisca das Chagas Rosa da Cruz', turma:'2023/2', defesa:'2026-02-26', orientador:'Érico Gomes Rodrigues', linha:'II', tcc:'http://bia.ifpi.edu.br:8080/jspui/handle/123456789/167', acomp:'pend', sit:'pend' },
+  { mat:'2024111PAPE0001', nome:'Arijane Adne Santiago Alves', turma:'2024/1', defesa:'2026-03-12', orientador:'Glairton Cardoso Rocha', linha:'II', tcc:'https://bia.ifpi.edu.br/jspui/handle/123456789/5586', acomp:'pend', sit:'pend' },
+];
+
+// ── STATE ─────────────────────────────────────────────
+let DADOS  = [];
+let tabAtiva = 'todos';
+let chartsOk = false;
+let chartSit, chartTurma;
+
+// ── INIT ──────────────────────────────────────────────
+usarDemo();
+
+function usarDemo() {
+  DADOS = DEMO.filter(e => { const d = calcDias(e.defesa); return d !== null && d >= 0; });
+  document.getElementById('load-status').textContent = '✓ Dados demo · ' + DADOS.length + ' egressos ativos';
+  inicializar();
+}
+
+async function carregarSheets() {
+  const url = document.getElementById('csv-url').value.trim();
+  if (!url) { document.getElementById('load-status').textContent = '⚠ Informe a URL do CSV'; return; }
+  document.getElementById('load-status').textContent = '…carregando';
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const txt = await r.text();
+    const parsed = parseCSV(txt).filter(e => { const d = calcDias(e.defesa); return d !== null && d >= 0; });
+    DADOS = parsed;
+    document.getElementById('load-status').textContent = '✓ ' + DADOS.length + ' egressos · ' + new Date().toLocaleTimeString('pt-BR');
+    inicializar();
+  } catch (err) {
+    document.getElementById('load-status').textContent = '✗ ' + err.message;
+  }
+}
+
+function parseCSV(text) {
+  const linhas = text.trim().split('\n');
+  const hdrs = linhas[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  return linhas.slice(1).filter(l => l.trim()).map(linha => {
+    const vals = []; let cur = '', inQ = false;
+    for (let i = 0; i < linha.length; i++) {
+      if (linha[i] === '"') inQ = !inQ;
+      else if (linha[i] === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else cur += linha[i];
+    }
+    vals.push(cur.trim());
+    const o = {};
+    hdrs.forEach((h, i) => {
+      const v = (vals[i] || '').replace(/^"|"$/g, '');
+      if (h === 'Matricula')          o.mat        = v;
+      if (h === 'Nome')               o.nome       = v;
+      if (h === 'Turma')              o.turma      = v;
+      if (h === 'Orientador')         o.orientador = v;
+      if (h === 'Linha')              o.linha      = v;
+      if (h === 'Data_Defesa')        o.defesa     = v;
+      if (h === 'Link_TCC')           o.tcc        = v;
+      if (h === 'Status_Contato')     o.acomp      = mapAcomp(v);
+      if (h === 'Emprego_Atual')      o.cargo      = v;
+      if (h === 'Instituicao')        o.inst       = v;
+      if (h === 'Situacao_Atual')     o.sit        = mapSit(v);
+      if (h === 'Motivo_Nao_Trabalhando') o.motivoNaoTrab = v;
+      if (h === 'Doutorado_Status')   o.dout       = mapDout(v);
+      if (h === 'Doutorado_Instituicao') o.doutInst = v;
+      if (h === 'Doutorado_Programa') o.doutProg   = v;
+      if (h === 'TCC_Aplicado')       o.tccApl     = v;
+    });
+    if (!o.sit) o.sit = o.acomp === 'resp' ? 'emp' : 'pend';
+    return o;
+  }).filter(e => e.mat);
+}
+
+const mapAcomp = v => {
+  if (!v) return 'pend';
+  if (v === 'Respondeu') return 'resp';
+  if (v === 'Forms enviado') return 'env';
+  if (v === 'Contato telefônico') return 'ctelf';
+  if (v === 'Sem retorno') return 'sret';
+  return 'pend';
+};
+const mapSit = v => {
+  if (!v) return 'pend';
+  if (v.toLowerCase().includes('empregado') || v.toLowerCase().includes('autôn')) return 'emp';
+  if (v.toLowerCase().includes('doutorado')) return 'dout';
+  if (v.toLowerCase().includes('desempreg')) return 'desemp';
+  if (v.toLowerCase().includes('afastado') || v.toLowerCase().includes('licença')) return 'afast';
+  if (v.toLowerCase().includes('aposentado')) return 'apos';
+  return 'pend';
+};
+const mapDout = v => {
+  if (!v) return 'nao';
+  if (v.toLowerCase().includes('cursando')) return 'sim';
+  if (v.toLowerCase().includes('concluí')) return 'concluido';
+  if (v.toLowerCase().includes('breve')) return 'breve';
+  if (v.toLowerCase().includes('interesse')) return 'interesse';
+  return 'nao';
+};
+
+// ── INICIALIZAR ────────────────────────────────────────
+function inicializar() {
+  preencherFiltros();
+  renderKPIs();
+  renderCharts();
+  renderTabela();
+  const agora = new Date().toLocaleDateString('pt-BR');
+  document.getElementById('hero-date').textContent = agora;
+  document.getElementById('last-update-hdr').textContent = 'Atualizado ' + agora;
+}
+
+function preencherFiltros() {
+  const sel = document.getElementById('f-turma');
+  const turmas = [...new Set(DADOS.map(e => e.turma))].sort();
+  sel.innerHTML = '<option value="">Todas as turmas</option>' +
+    turmas.map(t => `<option value="${t}">Turma ${t}</option>`).join('');
+}
+
+// ── KPIs ──────────────────────────────────────────────
+function renderKPIs() {
+  const d = DADOS;
+  const resp    = d.filter(e => e.acomp === 'resp');
+  const taxa    = d.length ? Math.round(resp.length / d.length * 100) : 0;
+  const empResp = resp.filter(e => e.sit === 'emp');
+  const naArea  = empResp.length ? Math.round(empResp.length / empResp.length * 100) : 0;
+  const dout    = d.filter(e => e.dout === 'sim' || e.sit === 'dout');
+  const tccApl  = resp.filter(e => e.tccApl === 'Sim' || e.tccApl === 'Parcialmente');
+  const tccTax  = resp.length ? Math.round(tccApl.length / resp.length * 100) : 0;
+  const doutInsts = [...new Set(dout.filter(e => e.doutInst).map(e => e.doutInst))];
+
+  set('k-total', d.length);
+  set('k-taxa', taxa + '%');
+  set('k-taxa-s', resp.length + ' de ' + d.length + ' responderam');
+  set('k-area', empResp.length ? '≥ 90%' : '—');
+  set('k-dout', dout.length);
+  set('k-dout-s', doutInsts.length ? doutInsts.slice(0, 2).join(', ') + (doutInsts.length > 2 ? ' +' + (doutInsts.length - 2) : '') : 'Diferentes instituições');
+  set('k-tcc', tccTax + '%');
+}
+const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+// ── CHARTS ────────────────────────────────────────────
+function renderCharts() {
+  const resp = DADOS.filter(e => e.acomp === 'resp');
+  const cEmp    = resp.filter(e => e.sit === 'emp').length;
+  const cDout   = resp.filter(e => e.sit === 'dout' || e.dout === 'sim').length;
+  const cAfast  = resp.filter(e => e.sit === 'afast').length;
+  const cDesemp = resp.filter(e => e.sit === 'desemp').length;
+  const cOutro  = resp.length - cEmp - cDout - cAfast - cDesemp;
+
+  const allVals   = [cEmp, cDout, cAfast, cDesemp, cOutro];
+  const allLabels = ['Empregado(a)', 'Em doutorado', 'Afastado(a) temp.', 'Desempregado(a)', 'Outra situação'];
+  const allColors = ['#2557A7', '#7F77DD', '#EF9F27', '#D85A30', '#888780'];
+
+  const idxs = allVals.map((v, i) => v > 0 ? i : -1).filter(i => i >= 0);
+  const sitData   = idxs.map(i => allVals[i]);
+  const sitLabels = idxs.map(i => allLabels[i]);
+  const sitColors = idxs.map(i => allColors[i]);
+
+  if (chartSit) chartSit.destroy();
+  chartSit = new Chart(document.getElementById('chart-sit'), {
+    type: 'doughnut',
+    data: { labels: sitLabels, datasets: [{ data: sitData, backgroundColor: sitColors, borderWidth: 2, borderColor: '#fff', hoverOffset: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: v => `${v.label}: ${v.parsed}` } } } }
+  });
+  document.getElementById('leg-sit').innerHTML = sitLabels.map((l, i) =>
+    `<div class="legend-item"><span class="legend-swatch" style="background:${sitColors[i]}"></span>${l}<span class="legend-val">${sitData[i]}</span></div>`
+  ).join('');
+
+  const turmasAll = { '2019': [2, 4], '2021': [5, 6], '2022': [3, 6], '2023': [5, 4], '2024': [0, 1] };
+  if (chartTurma) chartTurma.destroy();
+  chartTurma = new Chart(document.getElementById('chart-turma'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(turmasAll),
+      datasets: [
+        { label: 'Linha I', data: Object.values(turmasAll).map(v => v[0]), backgroundColor: '#2557A7', borderRadius: 3, borderSkipped: false },
+        { label: 'Linha II', data: Object.values(turmasAll).map(v => v[1]), backgroundColor: '#7F77DD', borderRadius: 3, borderSkipped: false },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: v => `${v.dataset.label}: ${v.parsed.y}` } } },
+      scales: {
+        x: { stacked: true, ticks: { color: '#64748B', font: { size: 11, family: "'DM Sans'" } }, grid: { color: 'rgba(0,0,0,.05)' } },
+        y: { stacked: true, ticks: { color: '#64748B', font: { size: 11, family: "'DM Sans'" }, stepSize: 2 }, grid: { color: 'rgba(0,0,0,.05)' }, beginAtZero: true },
+      }
+    }
+  });
+}
+
+// ── TABELA ────────────────────────────────────────────
+const SIT_MAP = {
+  emp:      { label: 'Empregado(a)',     cls: 'b-resp' },
+  dout:     { label: 'Em doutorado',     cls: 'b-dout' },
+  concluido:{ label: 'Doutor(a)',        cls: 'b-dout' },
+  desemp:   { label: 'Desempregado(a)', cls: 'b-desemp' },
+  afast:    { label: 'Afastado(a) temp.', cls: 'b-afast' },
+  apos:     { label: 'Aposentado(a)',    cls: 'b-pend' },
+  pend:     { label: '—',               cls: 'b-pend' },
+};
+const DOUT_MAP = {
+  sim:      { label: 'Cursando',   cls: 'b-dout' },
+  concluido:{ label: 'Concluído',  cls: 'b-dout' },
+  breve:    { label: 'Em breve',   cls: 'b-env'  },
+  interesse:{ label: 'Interesse',  cls: 'b-warn' },
+  nao:      { label: '—',         cls: 'b-pend' },
+};
+const ACOMP_LBL = { resp: 'Dados atualizados', env: 'Forms enviado', ctelf: 'Em contato', pend: 'Em acompanhamento', sret: 'Aguardando' };
+const ACOMP_CLS = { resp: 'b-resp', env: 'b-env', ctelf: 'b-warn', pend: 'b-pend', sret: 'b-desemp' };
+
+function renderTabela() {
+  const busca  = document.getElementById('busca').value.toLowerCase();
+  const fTurma = document.getElementById('f-turma').value;
+  const hasF   = busca || fTurma;
+  document.getElementById('btn-limpar').style.display = hasF ? 'inline-block' : 'none';
+
+  let lista = DADOS.filter(e => {
+    if (fTurma && e.turma !== fTurma) return false;
+    if (busca && !e.nome.toLowerCase().includes(busca) && !(e.mat || '').toLowerCase().includes(busca)) return false;
+    if (tabAtiva === 'emp'  && e.sit !== 'emp') return false;
+    if (tabAtiva === 'dout' && e.dout !== 'sim' && e.sit !== 'dout') return false;
+    if (tabAtiva === 'resp' && e.acomp !== 'resp') return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('tbody');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="10">Nenhum egresso encontrado com os filtros aplicados.</td></tr>';
+  } else {
+    tbody.innerHTML = lista.map(e => {
+      const sit  = SIT_MAP[e.sit]  || SIT_MAP.pend;
+      const dout = DOUT_MAP[e.dout] || DOUT_MAP.nao;
+      const ac   = ACOMP_LBL[e.acomp] || 'Em acompanhamento';
+      const acC  = ACOMP_CLS[e.acomp] || 'b-pend';
+      const nomeOr = (e.orientador || '').split(' ').slice(0, 3).join(' ');
+
+      const sitCell = e.sit === 'pend'
+        ? `<span class="dim">—</span>`
+        : e.sit === 'afast' && e.motivoNaoTrab
+          ? `<span class="badge ${sit.cls}">${sit.label}</span><p class="dim-sm" style="margin-top:2px">${e.motivoNaoTrab}</p>`
+          : `<span class="badge ${sit.cls}">${sit.label}</span>`;
+
+      const atuCell = e.sit === 'emp' && (e.cargo || e.inst)
+        ? `<span class="inst">${e.cargo || ''}</span>${e.inst ? `<br><span class="dim-sm">${e.inst}</span>` : ''}`
+        : e.sit === 'dout' && e.doutInst
+          ? `<span class="dim">${e.doutProg || 'Doutorado'}</span><br><span class="dim-sm">${e.doutInst}</span>`
+          : `<span class="dim">—</span>`;
+
+      const doutCell = e.dout === 'sim' && e.doutInst
+        ? `<span class="badge ${dout.cls}" style="font-size:10.5px">${dout.label}</span><br><span class="dim-sm">${e.doutInst}</span>`
+        : e.dout && e.dout !== 'nao' && e.dout !== 'pend'
+          ? `<span class="badge ${dout.cls}" style="font-size:10.5px">${dout.label}</span>`
+          : `<span class="dim">—</span>`;
+
+      const tccCell = e.tccApl
+        ? `<span style="color:${e.tccApl === 'Sim' ? 'var(--verde)' : e.tccApl === 'Parcialmente' ? 'var(--amber)' : 'var(--cinza)'}">${e.tccApl}</span>`
+        : `<span class="dim">—</span>`;
+
+      return `<tr>
+        <td><p class="nome">${e.nome}</p><p class="mat">${e.mat}</p></td>
+        <td style="font-size:12px;white-space:nowrap">${e.turma}</td>
+        <td style="font-size:11.5px;color:var(--texto-s)">${nomeOr}</td>
+        <td><span class="${e.linha === 'I' ? 'pill-l1' : 'pill-l2'}">${e.linha}</span></td>
+        <td>${sitCell}</td>
+        <td style="font-size:11.5px">${atuCell}</td>
+        <td>${doutCell}</td>
+        <td style="font-size:12px">${tccCell}</td>
+        <td><span class="badge ${acC}" style="font-size:10.5px">${ac}</span></td>
+        <td>${e.tcc ? `<a href="${e.tcc}" target="_blank" style="color:var(--azul-m);font-size:12px" title="Acessar TCC">↗</a>` : '<span class="dim">—</span>'}</td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('tfoot-l').textContent = `Exibindo ${lista.length} de ${DADOS.length} egressos ativos · Ref.: ${TODAY_STR}`;
+}
+
+function setTab(v, btn) {
+  tabAtiva = v;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTabela();
+}
+
+function limpar() {
+  document.getElementById('busca').value = '';
+  document.getElementById('f-turma').value = '';
+  tabAtiva = 'todos';
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+  renderTabela();
+}
+
+// ── CONFIG & UPDATE ───────────────────────────────────
+let configOpen = false;
+function toggleConfig() {
+  configOpen = !configOpen;
+  document.getElementById('config-panel').style.display = configOpen ? 'block' : 'none';
+  document.getElementById('btn-config').textContent = configOpen ? '✕ Fechar' : '⚙ Configurar';
+}
+
+async function atualizarDados() {
+  const btn = document.getElementById('btn-upd');
+  btn.textContent = '…';
+  btn.disabled = true;
+  const url = document.getElementById('csv-url').value.trim();
+  if (url) await carregarSheets(); else usarDemo();
+  btn.textContent = '↺ Atualizar';
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
