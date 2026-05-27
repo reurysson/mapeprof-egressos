@@ -646,7 +646,9 @@ let chartsOk = false;
 let chartSit, chartTurma;
 
 // ── INIT ──────────────────────────────────────────────
-usarDemo();
+const CSV_URL = 'https://script.google.com/macros/s/AKfycbw1NIY8o_MbE2WlUmz2km83NeFqOnh4rZsSE9w4Lm6EbHXqKpMcxPobOi5V6HHLPr9svw/exec';
+document.getElementById('csv-url').value = CSV_URL;
+carregarSheets();
 
 function usarDemo() {
   const demoComEfetiva = DEMO.map(e => ({
@@ -664,7 +666,7 @@ async function carregarSheets() {
   document.getElementById('load-status').textContent = '…carregando';
   try {
     const urlFresh = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
-  const r = await fetch(urlFresh, { cache: 'no-store' });
+    const r = await fetch(urlFresh, { redirect: 'follow', cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const txt = await r.text();
     const parsed = parseCSV(txt).filter(e => { const d = calcDias(e.defesaEfetiva); return d !== null && d >= 0; });
