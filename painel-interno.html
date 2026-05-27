@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Egressos — MAPEPROF/IFPI (Interno)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#1A3C6B;--azul-m:#2557A7;--azul-l:#E8F0FB;--azul-ll:#F4F7FD;--verde:#1E6B3C;--verde-l:#E8F5EE;--amber:#7A4D10;--amber-l:#FEF3E2;--coral:#8B2D1A;--coral-l:#FDECEA;--roxo:#5240AC;--roxo-l:#EEF0FB;--cinza:#64748B;--cinza-l:#F1F5F9;--cinza-b:#E2E8F0;--texto:#0F1F38;--texto-s:#475569;--borda:#D4DCE8;--branco:#FFFFFF;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--r:8px;--r-lg:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:#F0F4F8;color:var(--texto);font-size:14px;-webkit-font-smoothing:antialiased}
+.hdr{background:var(--azul);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(26,60,107,.3)}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-logo{width:34px;height:34px;border-radius:7px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:16px}
+.hdr-title{font-size:14px;font-weight:500}.hdr-sub{font-size:11px;opacity:.6;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.btn-hdr{padding:5px 12px;border-radius:var(--r);border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font-family:var(--font);font-size:12px;cursor:pointer}
+.btn-hdr:hover{background:rgba(255,255,255,.2)}
+.badge-int{background:#EF4444;color:#fff;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;letter-spacing:.5px}
+.cfg{background:var(--branco);border-bottom:1px solid var(--borda);padding:14px 24px;display:none}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.cfg-lbl{font-size:11px;font-weight:500;color:var(--cinza);margin-bottom:3px;display:block}
+.cfg-inp{width:100%;padding:7px 10px;border:1px solid var(--cinza-b);border-radius:var(--r);font-family:var(--font);font-size:12px;background:var(--cinza-l);color:var(--texto);outline:none}
+.cfg-inp:focus{border-color:var(--azul-m);background:#fff}
+.cfg-hint{font-size:10px;color:#94A3B8;margin-top:2px}
+.btn-load{padding:6px 14px;border-radius:var(--r);background:var(--azul);color:#fff;border:none;font-family:var(--font);font-size:12px;cursor:pointer}
+.btn-load:hover{background:var(--azul-m)}
+.main{max-width:1400px;margin:0 auto;padding:20px 24px 60px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:var(--branco);border:1px solid var(--borda);border-radius:var(--r-lg);padding:14px 16px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-c,var(--azul-m));border-radius:3px 3px 0 0}
+.kpi-lbl{font-size:11px;color:var(--cinza);margin-bottom:3px}.kpi-val{font-size:26px;font-weight:300;line-height:1}.kpi-sub{font-size:10px;color:var(--cinza);margin-top:4px}
+.filters{background:var(--branco);border:1px solid var(--borda);border-radius:var(--r-lg);padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.fi{padding:6px 10px;border:1px solid var(--cinza-b);border-radius:var(--r);font-family:var(--font);font-size:12px;background:var(--cinza-l);color:var(--texto);outline:none}
+.fi:focus{border-color:var(--azul-m);background:#fff}
+select.fi{cursor:pointer}
+.btn-clear{padding:5px 10px;border-radius:var(--r);border:1px solid var(--cinza-b);background:none;color:var(--cinza);font-family:var(--font);font-size:12px;cursor:pointer;display:none}
+.tbl-wrap{background:var(--branco);border:1px solid var(--borda);border-radius:var(--r-lg);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+thead th{padding:9px 10px;background:var(--azul-ll);border-bottom:1px solid var(--borda);font-size:10.5px;font-weight:500;color:var(--cinza);text-align:left;white-space:nowrap}
+tbody td{padding:8px 10px;border-bottom:1px solid #F1F5F9;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--azul-ll)!important}
+.tbl-foot{padding:8px 14px;border-top:1px solid var(--cinza-b);background:var(--cinza-l);font-size:11px;color:var(--cinza);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;border:1px solid;white-space:nowrap}
+.b-resp{background:var(--verde-l);color:var(--verde);border-color:#A3D9B8}
+.b-env{background:var(--azul-l);color:var(--azul-m);border-color:#B5D4F4}
+.b-pend{background:var(--cinza-l);color:var(--cinza);border-color:var(--cinza-b)}
+.b-ctelf{background:var(--amber-l);color:var(--amber);border-color:#FAC775}
+.b-sret{background:var(--coral-l);color:var(--coral);border-color:#F5C4B3}
+.b-crit{background:#FEE2E2;color:#B91C1C;border-color:#FECACA}
+.b-aten{background:#FFEDD5;color:#C2410C;border-color:#FED7AA}
+.b-mon{background:#FEF9C3;color:#854D0E;border-color:#FEF08A}
+.b-reg{background:var(--verde-l);color:var(--verde);border-color:#A3D9B8}
+.pill-l1{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:500;background:var(--azul-l);color:var(--azul-m)}
+.pill-l2{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:500;background:var(--roxo-l);color:var(--roxo)}
+.nome-c{font-weight:500;font-size:12.5px}.mat-c{font-family:var(--mono);font-size:10px;color:#94A3B8;margin-top:1px}.dim{color:var(--cinza);font-size:11px}
+.send-btns{display:flex;gap:4px;flex-wrap:wrap}
+.btn-s{padding:3px 8px;border-radius:5px;border:1px solid;font-family:var(--font);font-size:11px;cursor:pointer;font-weight:500;white-space:nowrap}
+.s-email{background:#fff;color:var(--verde);border-color:#A3D9B8}.s-email:hover{background:var(--verde-l)}
+.s-wapp{background:#fff;color:#15803D;border-color:#86EFAC}.s-wapp:hover{background:#DCFCE7}
+.s-sms{background:#fff;color:var(--roxo);border-color:#C4B5FD}.s-sms:hover{background:var(--roxo-l)}
+.s-mark{background:var(--verde-l);color:var(--verde);border-color:#A3D9B8}.s-mark:hover{background:#C6F6D5}
+.row-crit td{background:#FFF5F5!important}.row-aten td{background:#FFF8F5!important}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.overlay.show{display:flex}
+.modal{background:var(--branco);border-radius:var(--r-lg);width:560px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-hdr{padding:16px 18px 12px;border-bottom:1px solid var(--cinza-b)}
+.modal-nome{font-size:15px;font-weight:500}.modal-meta{font-size:12px;color:var(--cinza);margin-top:3px}
+.modal-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:11px;background:var(--cinza-l);color:var(--texto-s);border:1px solid var(--cinza-b)}
+.modal-body{padding:14px 18px}
+.modal-lbl{font-size:11px;font-weight:500;color:var(--cinza);margin-bottom:5px;display:flex;justify-content:space-between}
+textarea.msg{width:100%;min-height:170px;padding:10px 12px;border:1px solid var(--cinza-b);border-radius:var(--r);font-family:var(--font);font-size:12.5px;line-height:1.6;resize:vertical;background:#FAFAFA;outline:none}
+textarea.msg:focus{border-color:var(--azul-m);background:#fff}
+.canal-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.canal-btn{padding:9px;border-radius:var(--r);border:1px solid;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:500;text-align:center}
+.c-email{background:var(--verde-l);color:var(--verde);border-color:#A3D9B8}.c-email:hover{background:#C6F6D5}
+.c-wapp{background:#DCFCE7;color:#15803D;border-color:#86EFAC}.c-wapp:hover{background:#BBF7D0}
+.c-sms{background:var(--roxo-l);color:var(--roxo);border-color:#C4B5FD}.c-sms:hover{background:#E0E7FF}
+.modal-info{background:var(--verde-l);border:1px solid #A3D9B8;border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--verde);margin-top:10px;display:none}
+.modal-ftr{padding:10px 18px;border-top:1px solid var(--cinza-b);display:flex;justify-content:flex-end;gap:8px}
+.btn-fechar{padding:6px 14px;border-radius:var(--r);border:1px solid var(--cinza-b);background:none;color:var(--cinza);font-family:var(--font);font-size:12px;cursor:pointer}
+.btn-menv{padding:6px 14px;border-radius:var(--r);border:1px solid #A3D9B8;background:var(--verde-l);color:var(--verde);font-family:var(--font);font-size:12px;cursor:pointer;font-weight:500}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">M</div>
+    <div><div class="hdr-title">MAPEPROF · IFPI — Gestão de Egressos</div><div class="hdr-sub">Painel interno · Coordenação do Programa</div></div>
+  </div>
+  <div class="hdr-right">
+    <span class="badge-int">🔒 USO INTERNO</span>
+    <span id="hdr-sync" style="font-size:11px;opacity:.6"></span>
+    <button class="btn-hdr" onclick="toggleCfg()" id="btn-cfg">⚙ Configurar</button>
+    <button class="btn-hdr" onclick="atualizar()" id="btn-upd">↺ Atualizar</button>
+  </div>
+</header>
+
+<div class="cfg" id="cfg-panel">
+  <div style="max-width:1400px;margin:0 auto">
+    <div class="cfg-grid">
+      <div>
+        <label class="cfg-lbl">URL CSV — aba "Acompanhamento"</label>
+        <input class="cfg-inp" type="url" id="csv-url">
+        <p class="cfg-hint">Planilha → Arquivo → Publicar na web → Aba Acompanhamento → CSV</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-load" onclick="carregar()">↓ Carregar</button>
+      <span id="load-status" style="font-size:12px;color:var(--cinza)"></span>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="kpis">
+    <div class="kpi" style="--kpi-c:#2557A7"><p class="kpi-lbl">Total ativos</p><p class="kpi-val" id="k-total">—</p><p class="kpi-sub">Prazo CAPES vigente</p></div>
+    <div class="kpi" style="--kpi-c:#B91C1C"><p class="kpi-lbl">🔴 Críticos</p><p class="kpi-val" id="k-crit">—</p><p class="kpi-sub">Prazo &lt; 6 meses</p></div>
+    <div class="kpi" style="--kpi-c:#C2410C"><p class="kpi-lbl">🟠 Atenção</p><p class="kpi-val" id="k-aten">—</p><p class="kpi-sub">Prazo &lt; 12 meses</p></div>
+    <div class="kpi" style="--kpi-c:#1E6B3C"><p class="kpi-lbl">✅ Responderam</p><p class="kpi-val" id="k-resp">—</p><p class="kpi-sub" id="k-resp-s">—</p></div>
+    <div class="kpi" style="--kpi-c:#64748B"><p class="kpi-lbl">📭 Não contatados</p><p class="kpi-val" id="k-nc">—</p><p class="kpi-sub">Aguardando envio</p></div>
+    <div class="kpi" style="--kpi-c:#854D0E"><p class="kpi-lbl">📤 Forms enviado</p><p class="kpi-val" id="k-env">—</p><p class="kpi-sub">Aguardando resposta</p></div>
+  </div>
+  <div id="alerta-bar"></div>
+  <div class="filters">
+    <input class="fi" type="text" id="busca" placeholder="🔍 Buscar nome ou matrícula…" style="width:210px" oninput="render()">
+    <select class="fi" id="f-orient" onchange="render()"></select>
+    <select class="fi" id="f-turma" onchange="render()"></select>
+    <select class="fi" id="f-urg" onchange="render()">
+      <option value="">Todas as urgências</option>
+      <option value="crit">🔴 Crítico (&lt;6m)</option>
+      <option value="aten">🟠 Atenção (&lt;12m)</option>
+      <option value="mon">🟡 Monitorar (&lt;2a)</option>
+      <option value="reg">🟢 Regular</option>
+    </select>
+    <select class="fi" id="f-status" onchange="render()">
+      <option value="">Todos os status</option>
+      <option value="Não contatado">Não contatado</option>
+      <option value="Forms enviado">Forms enviado</option>
+      <option value="Respondeu">Respondeu</option>
+      <option value="Contato telefônico">Contato telefônico</option>
+      <option value="Sem retorno">Sem retorno</option>
+    </select>
+    <select class="fi" id="f-sort" onchange="render()" style="margin-left:auto">
+      <option value="urg">Urgência CAPES</option>
+      <option value="nome">Nome A→Z</option>
+      <option value="turma">Turma</option>
+    </select>
+    <button class="btn-clear" id="btn-clear" onclick="limpar()">✕ Limpar</button>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr>
+          <th style="width:2%">#</th>
+          <th style="width:19%">Egresso</th>
+          <th style="width:8%">Turma</th>
+          <th style="width:14%">Orientador</th>
+          <th style="width:4%">L</th>
+          <th style="width:10%">Defesa efetiva</th>
+          <th style="width:10%">Prazo CAPES</th>
+          <th style="width:9%">Urgência</th>
+          <th style="width:9%">Status</th>
+          <th style="width:15%">Ações</th>
+          <th style="width:4%">TCC</th>
+        </tr></thead>
+        <tbody id="tbody"><tr><td colspan="11" style="text-align:center;padding:48px;color:var(--cinza)">Configure a URL do Sheets e clique em ↓ Carregar</td></tr></tbody>
+      </table>
+    </div>
+    <div class="tbl-foot"><span id="tfoot">—</span><span id="sync-ts"></span></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="fecharOverlay(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <div class="modal-nome" id="m-nome"></div>
+      <div class="modal-meta" id="m-meta"></div>
+      <div class="modal-chips" id="m-chips"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-lbl"><span>MENSAGEM (editável antes de enviar)</span><span id="m-canal-lbl" style="font-weight:400;color:var(--verde)"></span></div>
+      <textarea class="msg" id="m-msg"></textarea>
+      <div style="font-size:11px;font-weight:500;color:var(--cinza);margin:10px 0 6px">CANAL DE ENVIO</div>
+      <div class="canal-btns">
+        <button class="canal-btn c-email" onclick="enviar('email')">📧 E-mail</button>
+        <button class="canal-btn c-wapp"  onclick="enviar('whatsapp')">💬 WhatsApp</button>
+        <button class="canal-btn c-sms"   onclick="enviar('sms')">📱 SMS</button>
+      </div>
+      <div class="modal-info" id="m-info"></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-fechar" onclick="fecharModal()">Fechar</button>
+      <button class="btn-menv" id="btn-menv" onclick="marcarEnviado()">✓ Marcar como "Forms enviado"</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CSV_URL_PADRAO = "https://script.google.com/macros/s/AKfycbw1NIY8o_MbE2WlUmz2km83NeFqOnh4rZsSE9w4Lm6EbHXqKpMcxPobOi5V6HHLPr9svw/exec";
+const TODAY = new Date();
+let DADOS = [], statusLocal = {}, egressoModal = null;
+
+const parseData = s => { if(!s||s==='—') return null; const sep=s.includes('-')?'-':'/'; const p=s.split(sep).map(Number); return sep==='-'?new Date(p[0],p[1]-1,p[2]):new Date(p[2],p[1]-1,p[0]); };
+const calcDias = s => { const d=parseData(s); if(!d) return null; const l=new Date(d); l.setFullYear(l.getFullYear()+5); return Math.floor((l-TODAY)/86400000); };
+const fmtData = s => { const d=parseData(s); if(!d) return '—'; return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; };
+const fmtLimite = s => { const d=parseData(s); if(!d) return '—'; const l=new Date(d); l.setFullYear(l.getFullYear()+5); return `${String(l.getDate()).padStart(2,'0')}/${String(l.getMonth()+1).padStart(2,'0')}/${l.getFullYear()}`; };
+const urg = dias => { if(dias===null) return {lbl:'—',key:'',cls:''}; if(dias<0) return {lbl:'Expirado',key:'exp',cls:'b-pend'}; if(dias<180) return {lbl:'Crítico',key:'crit',cls:'b-crit'}; if(dias<365) return {lbl:'Atenção',key:'aten',cls:'b-aten'}; if(dias<730) return {lbl:'Monitorar',key:'mon',cls:'b-mon'}; return {lbl:'Regular',key:'reg',cls:'b-reg'}; };
+const stCls = {'Respondeu':'b-resp','Forms enviado':'b-env','Contato telefônico':'b-ctelf','Sem retorno':'b-sret','Não contatado':'b-pend'};
+const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+
+function parseCSV(txt){
+  const lin=txt.trim().split('\n'); const hdrs=lin[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim());
+  return lin.slice(1).filter(l=>l.trim()).map(linha=>{
+    const vals=[]; let cur='',inQ=false;
+    for(let i=0;i<linha.length;i++){ if(linha[i]==='"') inQ=!inQ; else if(linha[i]===','&&!inQ){vals.push(cur.trim());cur='';} else cur+=linha[i]; }
+    vals.push(cur.trim());
+    const o={};
+    hdrs.forEach((h,i)=>{ const v=(vals[i]||'').replace(/^"|"$/g,'');
+      if(h==='Matricula') o.mat=v; if(h==='Nome') o.nome=v; if(h==='Turma') o.turma=v;
+      if(h==='Orientador') o.orientador=v; if(h==='Linha') o.linha=v;
+      if(h==='Data_Defesa') o.defesa=v; if(h==='Prorrogacao_Defesa') o.defesaProrroga=v;
+      if(h==='Link_TCC') o.tcc=v; if(h==='Email_Contato') o.email=v;
+      if(h==='Telefone') o.tel=v.replace(/\D/g,''); if(h==='Form_URL') o.formUrl=v;
+      if(h==='Status_Contato') o.status=v||'Não contatado';
+      if(h==='Data_Envio_Forms') o.dataEnvio=v; if(h==='Data_Resposta') o.dataResp=v;
+      if(h==='Bolsista') o.bolsista=v==='Sim'||v==='sim';
+    });
+    o.defesaEfetiva=(o.defesaProrroga&&o.defesaProrroga.trim())?o.defesaProrroga:o.defesa;
+    return o;
+  }).filter(e=>e.mat);
+}
+
+window.addEventListener('load',()=>{ document.getElementById('csv-url').value=CSV_URL_PADRAO; carregar(); });
+
+async function carregar(){
+  statusLocal = {}; // limpa estado local para ler dados frescos do Sheets
+  const url=document.getElementById('csv-url').value.trim();
+  if(!url){set('load-status','⚠ Informe a URL');return;}
+  set('load-status','…carregando');
+  try{
+    const urlFresh=url+(url.includes('?')?'&':'?')+'_t='+Date.now();
+    const r=await fetch(urlFresh,{redirect:'follow',cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
+    const txt=await r.text();
+    DADOS=parseCSV(txt).filter(e=>{const d=calcDias(e.defesaEfetiva);return d!==null&&d>=0;});
+    const ts=new Date().toLocaleTimeString('pt-BR');
+    set('load-status','✓ '+DADOS.length+' egressos · '+ts);
+    set('hdr-sync','Atualizado '+ts); set('sync-ts','Última sincronização: '+ts);
+    preencherFiltros(); renderKPIs(); renderAlerta(); render();
+  }catch(err){ set('load-status','✗ '+err.message); }
+}
+
+async function atualizar(){ const b=document.getElementById('btn-upd'); b.textContent='…'; b.disabled=true; await carregar(); b.textContent='↺ Atualizar'; b.disabled=false; }
+
+function preencherFiltros(){
+  const fO=document.getElementById('f-orient'), fT=document.getElementById('f-turma');
+  const orients=[...new Set(DADOS.map(e=>e.orientador).filter(Boolean))].sort();
+  const turmas=[...new Set(DADOS.map(e=>e.turma).filter(Boolean))].sort();
+  fO.innerHTML='<option value="">Todos os orientadores</option>'+orients.map(o=>`<option value="${o}">${o.split(' ').slice(0,3).join(' ')}</option>`).join('');
+  fT.innerHTML='<option value="">Todas as turmas</option>'+turmas.map(t=>`<option value="${t}">Turma ${t}</option>`).join('');
+}
+
+function limpar(){ ['busca','f-orient','f-turma','f-urg','f-status'].forEach(id=>document.getElementById(id).value=''); document.getElementById('f-sort').value='urg'; render(); }
+
+function renderKPIs(){
+  const d=DADOS;
+  // st() lê statusLocal primeiro, depois dado real do Sheets
+  const st=e=>statusLocal[e.mat]?.status||e.status||'Não contatado';
+  set('k-total',d.length);
+  set('k-crit',d.filter(e=>{ const x=calcDias(e.defesaEfetiva); return x!==null&&x>=0&&x<180; }).length);
+  set('k-aten',d.filter(e=>{ const x=calcDias(e.defesaEfetiva); return x!==null&&x>=180&&x<365; }).length);
+  const resp=d.filter(e=>st(e)==='Respondeu').length;
+  const total=d.length||1;
+  set('k-resp',resp);
+  set('k-resp-s',resp+' de '+d.length+' · '+Math.round(resp/total*100)+'%');
+  set('k-nc',d.filter(e=>st(e)==='Não contatado'||st(e)==='Nao contatado').length);
+  set('k-env',d.filter(e=>st(e)==='Forms enviado').length);
+}
+
+function renderAlerta(){
+  const u=DADOS.filter(e=>{ const x=calcDias(e.defesaEfetiva); return x!==null&&x>=0&&x<365; }).sort((a,b)=>calcDias(a.defesaEfetiva)-calcDias(b.defesaEfetiva));
+  const el=document.getElementById('alerta-bar');
+  if(!u.length){el.innerHTML='';return;}
+  el.innerHTML=`<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--r-lg);padding:10px 14px;margin-bottom:14px"><div style="font-size:12px;font-weight:500;color:#991B1B;margin-bottom:7px">⚠️ ${u.length} egresso(s) com prazo CAPES encerrando em menos de 12 meses</div><div style="display:flex;flex-wrap:wrap;gap:5px">${u.map(e=>`<div onclick="abrirModal('${e.mat}')" style="background:#fff;border-radius:5px;padding:4px 10px;font-size:11px;border:1px solid ${calcDias(e.defesaEfetiva)<180?'#EF4444':'#F97316'};color:${calcDias(e.defesaEfetiva)<180?'#B91C1C':'#C2410C'};cursor:pointer"><strong>${e.nome.split(' ').slice(0,3).join(' ')}</strong> · ${calcDias(e.defesaEfetiva)}d · lim. ${fmtLimite(e.defesaEfetiva)}</div>`).join('')}</div></div>`;
+}
+
+function render(){
+  const busca=document.getElementById('busca').value.toLowerCase();
+  const fO=document.getElementById('f-orient').value, fT=document.getElementById('f-turma').value;
+  const fUrg=document.getElementById('f-urg').value, fSt=document.getElementById('f-status').value;
+  const sort=document.getElementById('f-sort').value;
+  const hasF=busca||fO||fT||fUrg||fSt;
+  document.getElementById('btn-clear').style.display=hasF?'inline-block':'none';
+  const st=e=>statusLocal[e.mat]?.status||e.status;
+  const de=e=>statusLocal[e.mat]?.dataEnvio||e.dataEnvio;
+  let rows=DADOS.filter(e=>{
+    if(fO&&e.orientador!==fO) return false; if(fT&&e.turma!==fT) return false;
+    if(fSt&&st(e)!==fSt) return false; if(fUrg&&urg(calcDias(e.defesaEfetiva)).key!==fUrg) return false;
+    if(busca&&!e.nome.toLowerCase().includes(busca)&&!(e.mat||'').toLowerCase().includes(busca)) return false;
+    return true;
+  });
+  if(sort==='urg') rows.sort((a,b)=>(calcDias(a.defesaEfetiva)??99999)-(calcDias(b.defesaEfetiva)??99999));
+  if(sort==='nome') rows.sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
+  if(sort==='turma') rows.sort((a,b)=>(a.turma||'').localeCompare(b.turma||''));
+  const tbody=document.getElementById('tbody');
+  if(!rows.length){ tbody.innerHTML='<tr><td colspan="11" style="text-align:center;padding:40px;color:var(--cinza)">Nenhum egresso encontrado.</td></tr>'; }
+  else { tbody.innerHTML=rows.map((e,i)=>{
+    const d=calcDias(e.defesaEfetiva), u=urg(d), s=st(e), denv=de(e);
+    const rc=u.key==='crit'?'row-crit':u.key==='aten'?'row-aten':'';
+    const nomeOr=(e.orientador||'').split(' ').slice(0,2).join(' ');
+    const nomeOr2=(e.orientador||'').split(' ').slice(2).join(' ');
+    const jaEnv=s==='Forms enviado'||s==='Respondeu';
+    return `<tr class="${rc}">
+      <td style="color:#CBD5E1;font-size:11px">${i+1}</td>
+      <td><div class="nome-c">${e.nome}</div><div class="mat-c">${e.mat}${e.bolsista?' · 🎓':''}</div></td>
+      <td style="font-size:12px;white-space:nowrap">${e.turma||'—'}</td>
+      <td style="font-size:11.5px;color:var(--texto-s);line-height:1.4">${nomeOr}<br><span class="dim">${nomeOr2}</span></td>
+      <td><span class="${e.linha==='I'?'pill-l1':'pill-l2'}">${e.linha||'—'}</span></td>
+      <td style="font-size:11.5px;white-space:nowrap">${fmtData(e.defesaEfetiva)}${e.defesaProrroga&&e.defesaProrroga.trim()?'<br><span class="dim" style="font-size:10px">prorrogado</span>':''}</td>
+      <td style="font-family:var(--mono);font-size:11px;font-weight:500;white-space:nowrap">${fmtLimite(e.defesaEfetiva)}</td>
+      <td><span class="badge ${u.cls}">${d!==null?d+'d':'—'} · ${u.lbl}</span></td>
+      <td><span class="badge ${stCls[s]||'b-pend'}" style="font-size:10.5px">${s}</span>${denv?`<div class="dim" style="margin-top:2px;font-size:10px">Env: ${fmtData(denv)}</div>`:''}</td>
+      <td><div class="send-btns">
+        <button class="btn-s s-email" onclick="abrirModal('${e.mat}')">📤 Enviar</button>
+        ${!jaEnv?`<button class="btn-s s-mark" onclick="event.stopPropagation();_marcarEnviado('${e.mat}')">✓</button>`:''}
+      </div></td>
+      <td>${e.tcc?`<a href="${e.tcc}" target="_blank" style="color:var(--azul-m);font-size:12px">↗</a>`:'<span class="dim">—</span>'}</td>
+    </tr>`; }).join(''); }
+  set('tfoot','Exibindo '+rows.length+' de '+DADOS.length+' egressos ativos');
+  renderKPIs();
+}
+
+function abrirModal(mat){
+  const e=DADOS.find(d=>d.mat===mat); if(!e) return; egressoModal=e;
+  const s=statusLocal[e.mat]?.status||e.status;
+  const u=urg(calcDias(e.defesaEfetiva));
+  const url=e.formUrl||'[Form_URL não disponível — verifique a planilha]';
+  document.getElementById('m-nome').textContent=e.nome;
+  document.getElementById('m-meta').textContent=`Turma ${e.turma||'—'} · ${e.orientador||'—'} · Linha ${e.linha||'—'}`;
+  const chips=[];
+  chips.push(`<span class="chip">📅 Defesa: ${fmtData(e.defesaEfetiva)}${e.defesaProrroga&&e.defesaProrroga.trim()?' (prorrogado)':''}</span>`);
+  chips.push(`<span class="chip badge ${u.cls}">⏳ Limite: ${fmtLimite(e.defesaEfetiva)} · ${u.lbl}</span>`);
+  chips.push(`<span class="chip badge ${stCls[s]||'b-pend'}">${s}</span>`);
+  if(e.email) chips.push(`<span class="chip">📧 ${e.email}</span>`);
+  if(e.tel) chips.push(`<span class="chip">📱 (${e.tel.slice(0,2)}) ${e.tel.slice(2,7)}-${e.tel.slice(7)}</span>`);
+  document.getElementById('m-chips').innerHTML=chips.join('');
+  const primeiro=e.nome.split(' ')[0];
+  document.getElementById('m-msg').value=`Prezado(a) ${primeiro},\n\nO MAPEPROF/IFPI, em conformidade com a Portaria CAPES nº 131/2017, solicita gentilmente o preenchimento do formulário de acompanhamento de egressos. O preenchimento leva menos de 5 minutos e é fundamental para a avaliação do programa.\n\n👉 Acesse aqui: ${url}\n\nQualquer dúvida, entre em contato com a Coordenação.\n\nAtenciosamente,\nCoordenação do MAPEPROF/IFPI`;
+  document.getElementById('m-info').style.display='none';
+  document.getElementById('m-canal-lbl').textContent='';
+  const btnM=document.getElementById('btn-menv');
+  if(s==='Respondeu'){btnM.style.display='none';}
+  else{btnM.style.display='inline-block';btnM.disabled=s==='Forms enviado';btnM.textContent=s==='Forms enviado'?'✓ Já marcado':'✓ Marcar como "Forms enviado"';}
+  document.getElementById('overlay').classList.add('show');
+}
+
+function enviar(canal){
+  if(!egressoModal) return;
+  const e=egressoModal, msg=encodeURIComponent(document.getElementById('m-msg').value);
+  const subj=encodeURIComponent('Formulário de Acompanhamento de Egressos — MAPEPROF/IFPI');
+  let url='',lbl='';
+  if(canal==='email'){url=`mailto:${e.email||''}?subject=${subj}&body=${msg}`;lbl='E-mail';}
+  if(canal==='whatsapp'){url=`https://wa.me/55${e.tel||''}?text=${msg}`;lbl='WhatsApp';}
+  if(canal==='sms'){url=`sms:+55${e.tel||''}?body=${msg}`;lbl='SMS';}
+  if(url) window.open(url,'_blank');
+  document.getElementById('m-canal-lbl').textContent='✓ '+lbl+' aberto';
+  const info=document.getElementById('m-info'); info.style.display='block';
+  info.textContent='✅ '+lbl+' aberto! Após enviar, clique em "Marcar como Forms enviado" e atualize o status no Sheets.';
+}
+
+function marcarEnviado(){ if(!egressoModal) return; _marcarEnviado(egressoModal.mat); const b=document.getElementById('btn-menv'); b.disabled=true; b.textContent='✓ Marcado'; document.getElementById('m-info').style.display='block'; document.getElementById('m-info').textContent='✅ Status atualizado no painel. Lembre de atualizar também a coluna Status_Contato no Google Sheets.'; }
+function _marcarEnviado(mat){ statusLocal[mat]={status:'Forms enviado',dataEnvio:new Date().toLocaleDateString('pt-BR')}; render(); }
+function fecharModal(){ document.getElementById('overlay').classList.remove('show'); egressoModal=null; }
+function fecharOverlay(e){ if(e.target===document.getElementById('overlay')) fecharModal(); }
+let cfgOpen=false;
+function toggleCfg(){ cfgOpen=!cfgOpen; document.getElementById('cfg-panel').style.display=cfgOpen?'block':'none'; document.getElementById('btn-cfg').textContent=cfgOpen?'✕ Fechar':'⚙ Configurar'; }
+</script>
+</body>
+</html>
